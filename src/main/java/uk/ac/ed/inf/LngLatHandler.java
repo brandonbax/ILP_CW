@@ -55,7 +55,9 @@ public class LngLatHandler implements LngLatHandling {
             return false;
         }
 
-        LngLat rayStartingPoint = new LngLat(minX - SystemConstants.DRONE_IS_CLOSE_DISTANCE, position.lat());
+        // Padding on the start position of the cast ray, to ensure that it starts left of any polygon edge
+        double padding = 1E-5;
+        LngLat rayStartingPoint = new LngLat(minX - padding, position.lat());
         int intersections = 0;
         for (int i = 0; i < region.vertices().length - 2; i++){
             if (areIntersecting(rayStartingPoint, position, region.vertices()[i], region.vertices()[i+1])){
@@ -91,6 +93,13 @@ public class LngLatHandler implements LngLatHandling {
 
     @Override
     public LngLat nextPosition(LngLat startPosition, double angle) {
-        return null;
+        if (angle % 22.5 != 0){
+            throw new RuntimeException("Invalid angle. Enter an angle on one of the 16 compass points");
+        }
+        // The next position can be found by breaking the vector into its component forms (longitude and latitude)
+        // and adding them to the start position.
+        double x = SystemConstants.DRONE_MOVE_DISTANCE * Math.cos(angle);
+        double y = SystemConstants.DRONE_MOVE_DISTANCE * Math.sin(angle);
+        return new LngLat(startPosition.lng() + x, startPosition.lat() + y);
     }
 }
