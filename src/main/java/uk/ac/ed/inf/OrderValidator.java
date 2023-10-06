@@ -7,7 +7,6 @@ import uk.ac.ed.inf.ilp.data.Pizza;
 import uk.ac.ed.inf.ilp.data.Restaurant;
 import uk.ac.ed.inf.ilp.interfaces.OrderValidation;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -87,9 +86,24 @@ public class OrderValidator implements OrderValidation {
             return orderToValidate;
         }
 
-        for (Pizza pizza: orderToValidate.getPizzasInOrder()){
-            if (numPizzaInMenu(pizza, definedRestaurants) == 0){
+        Restaurant initialRestaurant = restaurantWithPizza(orderToValidate.getPizzasInOrder()[0], definedRestaurants);
+        if (initialRestaurant == null){
+            orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
+            return orderToValidate;
+        }
+        if (Arrays.stream(initialRestaurant.openingDays()).noneMatch(day -> orderToValidate.getOrderDate().getDayOfWeek() == day)){
+            orderToValidate.setOrderValidationCode(OrderValidationCode.RESTAURANT_CLOSED);
+            return orderToValidate;
+        }
+
+        for (int i = 1; i < orderToValidate.getPizzasInOrder().length; i++){
+            Restaurant currentRestaurant = restaurantWithPizza(orderToValidate.getPizzasInOrder()[i], definedRestaurants);
+            if (currentRestaurant == null){
                 orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
+                return orderToValidate;
+            }
+            if (currentRestaurant != initialRestaurant){
+                orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
                 return orderToValidate;
             }
         }
@@ -97,23 +111,14 @@ public class OrderValidator implements OrderValidation {
         return null;
     }
 
-    private int numPizzaInMenu(Pizza pizza, Restaurant[] definedRestaurants){
-        int n = 0;
-        boolean foundPizzaInRestaurant = false;
-
+    private Restaurant restaurantWithPizza(Pizza pizza, Restaurant[] definedRestaurants){
         for (Restaurant restaurant: definedRestaurants){
-            foundPizzaInRestaurant = false;
             for (Pizza pizzaInMenu: restaurant.menu()){
                 if (pizzaInMenu.name().equals(pizza.name())){
-                    // To prevent this method from counting duplicate pizza in a single
-                    // restaurant as
-                    if (foundPizzaInRestaurant){
-                        throw new RuntimeException("Duplicate pizza in restaurant menu");
-                    }
-                    n++;
+                    return restaurant;
                 }
             }
         }
-        return n;
+        return null;
     }
 }
