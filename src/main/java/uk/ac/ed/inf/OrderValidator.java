@@ -1,5 +1,6 @@
 package uk.ac.ed.inf;
 
+import uk.ac.ed.inf.ilp.constant.OrderStatus;
 import uk.ac.ed.inf.ilp.constant.OrderValidationCode;
 import uk.ac.ed.inf.ilp.constant.SystemConstants;
 import uk.ac.ed.inf.ilp.data.Order;
@@ -47,6 +48,7 @@ public class OrderValidator implements OrderValidation {
         Matcher matcher = pattern.matcher(orderToValidate.getCreditCardInformation().getCreditCardNumber());
         if (!matcher.find()){
             orderToValidate.setOrderValidationCode(OrderValidationCode.CARD_NUMBER_INVALID);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
@@ -55,6 +57,7 @@ public class OrderValidator implements OrderValidation {
         matcher = pattern.matcher(orderToValidate.getCreditCardInformation().getCvv());
         if (!matcher.find()){
             orderToValidate.setOrderValidationCode(OrderValidationCode.CVV_INVALID);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
@@ -64,6 +67,7 @@ public class OrderValidator implements OrderValidation {
         matcher = pattern.matcher(orderToValidate.getCreditCardInformation().getCreditCardExpiry());
         if (!matcher.find()){
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
@@ -77,22 +81,30 @@ public class OrderValidator implements OrderValidation {
         LocalDate expDate = LocalDate.of(year, month, currentDate.getDayOfMonth());
         if (currentDate.isAfter(expDate)){
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
         // Checks that the number of pizzas in the order are less than the max allowed
         if (orderToValidate.getPizzasInOrder().length > SystemConstants.MAX_PIZZAS_PER_ORDER){
             orderToValidate.setOrderValidationCode(OrderValidationCode.MAX_PIZZA_COUNT_EXCEEDED);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
+        // Gets the restaurant with the first pizza so that the other pizzas can be checked to be in the same restaurant
         Restaurant initialRestaurant = restaurantWithPizza(orderToValidate.getPizzasInOrder()[0], definedRestaurants);
+        // If that restaurant is null, then the first pizza is not in a restaurant's menu. This check is done outside
+        // the for loop below because there is no need to check for multiple restaurant when there is only 1 pizza
         if (initialRestaurant == null){
             orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
+        // used the stream method noneMatch to check if the order date is not on any of the restaurants opening days
         if (Arrays.stream(initialRestaurant.openingDays()).noneMatch(day -> orderToValidate.getOrderDate().getDayOfWeek() == day)){
             orderToValidate.setOrderValidationCode(OrderValidationCode.RESTAURANT_CLOSED);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
@@ -100,17 +112,26 @@ public class OrderValidator implements OrderValidation {
             Restaurant currentRestaurant = restaurantWithPizza(orderToValidate.getPizzasInOrder()[i], definedRestaurants);
             if (currentRestaurant == null){
                 orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
+                orderToValidate.setOrderStatus(OrderStatus.INVALID);
                 return orderToValidate;
             }
             if (currentRestaurant != initialRestaurant){
                 orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
+                orderToValidate.setOrderStatus(OrderStatus.INVALID);
                 return orderToValidate;
             }
         }
 
-        return null;
+        orderToValidate.setOrderValidationCode(OrderValidationCode.NO_ERROR);
+        orderToValidate.setOrderStatus(OrderStatus.VALID_BUT_NOT_DELIVERED);
+        return orderToValidate;
     }
 
+    /**
+     * @param pizza is the pizza that need to have its associated restaurant found
+     * @param definedRestaurants is the list of all defined restaurants that will be searched
+     * @return the restaurant with the specified pizza or null if there is no such restaurant
+     */
     private Restaurant restaurantWithPizza(Pizza pizza, Restaurant[] definedRestaurants){
         for (Restaurant restaurant: definedRestaurants){
             for (Pizza pizzaInMenu: restaurant.menu()){
