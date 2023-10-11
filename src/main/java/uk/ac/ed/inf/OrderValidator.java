@@ -122,6 +122,24 @@ public class OrderValidator implements OrderValidation {
             }
         }
 
+        int totalOrderPrice = 0;
+        int totalRestaurantPrice = 0;
+        for (Pizza pizza: orderToValidate.getPizzasInOrder()){
+            totalOrderPrice += pizza.priceInPence();
+            for (Pizza pizzaInMenu: initialRestaurant.menu()){
+                if (pizzaInMenu.name().equals(pizza.name())){
+                    totalRestaurantPrice += pizzaInMenu.priceInPence();
+                    break;
+                }
+            }
+        }
+
+        if (totalOrderPrice != totalRestaurantPrice){
+            orderToValidate.setOrderValidationCode(OrderValidationCode.TOTAL_INCORRECT);
+            orderToValidate.setOrderStatus(OrderStatus.INVALID);
+            return orderToValidate;
+        }
+
         orderToValidate.setOrderValidationCode(OrderValidationCode.NO_ERROR);
         orderToValidate.setOrderStatus(OrderStatus.VALID_BUT_NOT_DELIVERED);
         return orderToValidate;
