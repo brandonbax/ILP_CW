@@ -39,8 +39,13 @@ public class OrderValidator implements OrderValidation {
     public Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants) {
         // Checks that the order contains credit card information, since it is possible to create
         // an Order object without it.
-        if (orderToValidate.getCreditCardInformation() == null){
-            throw new RuntimeException("Order missing credit card info");
+        if (orderToValidate.getCreditCardInformation() == null ||
+                orderToValidate.getCreditCardInformation().getCreditCardNumber() == null ||
+                orderToValidate.getCreditCardInformation().getCreditCardExpiry() == null ||
+                orderToValidate.getCreditCardInformation().getCvv() == null ||
+                orderToValidate.getPizzasInOrder().length == 0 ||
+                definedRestaurants.length == 0){
+            throw new IllegalArgumentException("There cannot be null objects or empty lists");
         }
 
         // Regex checks for a string containing only 16 digits from start to finish
@@ -73,7 +78,7 @@ public class OrderValidator implements OrderValidation {
 
         String[] monthAndYear = orderToValidate.getCreditCardInformation().getCreditCardExpiry().split("/");
         int month = Integer.parseInt(monthAndYear[0]);
-        int year = Integer.parseInt(monthAndYear[1]);
+        int year = Integer.parseInt("20" + monthAndYear[1]);
         LocalDate currentDate = LocalDate.now();
         // Since credit card expiration dates do not have a day (effectively the last day of the month),
         // the day is set to the current day so that it does not the comparison (if expDate and currentDate

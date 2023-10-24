@@ -32,10 +32,12 @@ public class LngLatHandler implements LngLatHandling {
 
     @Override
     public boolean isInRegion(LngLat position, NamedRegion region) {
+        // Sets initial values for finding max and min
         double minX = region.vertices()[0].lng();
         double maxX = region.vertices()[0].lng();
         double minY = region.vertices()[0].lat();
         double maxY = region.vertices()[0].lat();
+        // Finds the min and max x and y values in the given region (polygon)
         for (int i = 1; i < region.vertices().length - 1; i++){
             if (region.vertices()[i].lng() < minX){
                 minX = region.vertices()[i].lng();
@@ -51,14 +53,20 @@ public class LngLatHandler implements LngLatHandling {
             }
         }
 
+        // Using the min and max x and y values, a rectangle can be constructed around the polygon
+        // and if the point is outside this rectangle, then it is definitely outside the polygon
         if (position.lng() < minX || position.lng() > maxX || position.lat() < minY || position.lat() > maxY){
             return false;
         }
 
         // Padding on the start position of the cast ray, to ensure that it starts left of any polygon edge
         double padding = 1E-5;
+        // Starts the ray slightly left of the leftmost point in the polygon (so that the first edge is guaranteed to
+        // be counted, even with precision errors) at the same y position as the point that is being checked.
+        // This essentially gives a horizontal line which stops at the point we are checking
         LngLat rayStartingPoint = new LngLat(minX - padding, position.lat());
         int intersections = 0;
+        // Uses linear equations to check all the vertices in the polygon if they intersect with the ray
         for (int i = 0; i < region.vertices().length - 2; i++){
             if (areIntersecting(rayStartingPoint, position, region.vertices()[i], region.vertices()[i+1])){
                 intersections++;
@@ -69,6 +77,7 @@ public class LngLatHandler implements LngLatHandling {
     }
 
     private boolean areIntersecting(LngLat rayStartingPoint, LngLat point, LngLat vertex1, LngLat vertex2){
+        // Simplified some equations since a1 would always be 0 (as the ray is horizontal)
         double b1 = rayStartingPoint.lng() - point.lng();
         double c1 = (point.lng() * rayStartingPoint.lat()) - (rayStartingPoint.lng() * point.lat());
 
@@ -84,10 +93,18 @@ public class LngLatHandler implements LngLatHandling {
 
         d1 = (a2 * rayStartingPoint.lng()) + (b2 * rayStartingPoint.lat()) + c2;
         d2 = (a2 * point.lng()) + (b2 * point.lat()) + c2;
+
+        // if the signs of d1 and d2 are the same, then the lines do not intersect
         if ((d1 > 0 && d2 > 0) || (d1 < 0 && d2 < 0)){
             return false;
         }
 
+        // After testing, it seems that if the lines are collinear then that means the bottom edge of the polygon
+        // is horizontal and the point has the same y value as that edge. In this case if the case of collinear were
+        // to be counted as an intersection then 2 intersections would be counted when it hits the corner where
+        // the bottom edge meets the other 2 edges. This would result in a point on the bottom edge of the polygon to
+        // be counted as not in the region (when it should be), so any lines that are collinear (if a2 * b1 == 0) are
+        // counted as not intersecting.
         return a2 * b1 != 0;
     }
 
