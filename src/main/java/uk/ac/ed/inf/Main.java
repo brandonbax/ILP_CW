@@ -1,19 +1,17 @@
 package uk.ac.ed.inf;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import uk.ac.ed.inf.ilp.constant.OrderStatus;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.data.Order;
 import uk.ac.ed.inf.ilp.data.Restaurant;
 import uk.ac.ed.inf.ilp.interfaces.OrderValidation;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.net.URL;
-import java.util.Arrays;
 
 /**
  * Hello world!
@@ -48,7 +46,7 @@ public class Main {
         try{
             new URL(baseUrl).toURI();
         } catch (Exception e) {
-            System.err.println("The second argument is not a valid URL: " + e);
+            System.err.println(baseUrl + " is not a valid URL");
             System.exit(1);
         }
 
@@ -78,37 +76,46 @@ public class Main {
         Order[] orders = null;
         try {
             orders = mapper.readValue(new URL(baseUrl + ORDER_URL + "/" + date), Order[].class);
-            System.out.println("read all restaurants");
+            if (orders.length < 1){
+                System.err.println("No orders on: " + date);
+                System.exit(1);
+            }
         } catch (IOException e) {
-            System.err.println("Error reading restaurants from REST service: " + e);
+            System.err.println("Error reading orders from REST service: " + e);
             System.exit(1);
         }
 
         NamedRegion centralArea = null;
         try {
             centralArea = mapper.readValue(new URL(baseUrl + CENTRAL_AREA_URL), NamedRegion.class);
-            System.out.println("read all restaurants");
         } catch (IOException e) {
-            System.err.println("Error reading restaurants from REST service: " + e);
+            System.err.println("Error reading centralArea from REST service: " + e);
             System.exit(1);
         }
 
         NamedRegion[] noFlyZones = null;
         try {
             noFlyZones = mapper.readValue(new URL(baseUrl + NO_FLY_ZONE_URL), NamedRegion[].class);
-            System.out.println("read all restaurants");
         } catch (IOException e) {
-            System.err.println("Error reading restaurants from REST service: " + e);
+            System.err.println("Error reading noFlyZones from REST service: " + e);
             System.exit(1);
         }
 
         OrderValidation orderValidation = new OrderValidator();
         try{
+            assert orders != null;
             for (Order order: orders){
                 orderValidation.validateOrder(order, restaurants);
             }
         } catch (IllegalArgumentException e) {
-            System.err.println("Error reading restaurants from REST service: " + e);
+            System.err.println("Null values are present in the data in the rest service");
+            System.exit(1);
+        }
+
+        try{
+            mapper.writeValue(new File("resultfiles/orders.json"), orders);
+        } catch (Exception e) {
+            System.err.println("Failed to serialize orders class to json: " + e);
             System.exit(1);
         }
     }
