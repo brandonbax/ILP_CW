@@ -148,7 +148,7 @@ public class OrderValidator implements OrderValidation {
      * @param definedRestaurants is the list of all defined restaurants that will be searched
      * @return the restaurant with the specified pizza or null if there is no such restaurant
      */
-    private Restaurant restaurantWithPizza(Pizza pizza, Restaurant[] definedRestaurants){
+    public Restaurant restaurantWithPizza(Pizza pizza, Restaurant[] definedRestaurants){
         for (Restaurant restaurant: definedRestaurants){
             for (Pizza pizzaInMenu: restaurant.menu()){
                 if (pizzaInMenu.name().equals(pizza.name())){

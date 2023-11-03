@@ -5,6 +5,8 @@ import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.interfaces.LngLatHandling;
 
+import static uk.ac.ed.inf.FindPath.NUM_OF_DIRECTIONS;
+
 public class LngLatHandler implements LngLatHandling {
     /**
      * @param startPosition is where the start is
@@ -110,7 +112,7 @@ public class LngLatHandler implements LngLatHandling {
 
     @Override
     public LngLat nextPosition(LngLat startPosition, double angle) {
-        if (angle % 22.5 != 0){
+        if (angle % ((2 * Math.PI) / NUM_OF_DIRECTIONS) != 0){
             throw new RuntimeException("Invalid angle. Enter an angle on one of the 16 compass points");
         }
         // The next position can be found by breaking the vector into its component forms (longitude and latitude)
