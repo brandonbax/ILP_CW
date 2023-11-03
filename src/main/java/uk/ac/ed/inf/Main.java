@@ -61,7 +61,7 @@ public class Main {
         try{
             new URL(baseUrl).toURI();
         } catch (Exception e) {
-            System.err.println("The second argument is not a valid URL: " + e);
+            System.err.println(baseUrl + " is not a valid URL");
             System.exit(1);
         }
 
@@ -90,6 +90,10 @@ public class Main {
         Order[] orders = null;
         try {
             orders = mapper.readValue(new URL(baseUrl + ORDER_URL + "/" + date), Order[].class);
+            if (orders.length < 1){
+                System.err.println("No orders on: " + date);
+                System.exit(1);
+            }
         } catch (IOException e) {
             System.err.println("Error reading orders from REST service: " + e);
             System.exit(1);
@@ -117,7 +121,14 @@ public class Main {
                 orderValidator.validateOrder(order, restaurants);
             }
         } catch (IllegalArgumentException e) {
-            System.err.println("Error reading restaurants from REST service: " + e);
+            System.err.println("Null values are present in the data in the rest service");
+            System.exit(1);
+        }
+
+        try{
+            mapper.writeValue(new File("resultfiles/orders.json"), orders);
+        } catch (Exception e) {
+            System.err.println("Failed to serialize orders class to json: " + e);
             System.exit(1);
         }
 
