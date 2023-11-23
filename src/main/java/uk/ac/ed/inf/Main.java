@@ -125,24 +125,22 @@ public class Main {
             System.exit(1);
         }
 
-        try{
-            mapper.writeValue(new File("resultfiles/orders.json"), orders);
-        } catch (Exception e) {
-            System.err.println("Failed to serialize orders class to json: " + e);
-            System.exit(1);
-        }
-
         try {
-            Files.createDirectories(Paths.get("/" + OUTPUT_FOLDER_NAME));
+            Files.createDirectories(Paths.get("./" + OUTPUT_FOLDER_NAME));
         } catch (Exception e){
             System.err.println("Failed to create output folder: " + e);
             System.exit(1);
         }
 
+        ArrayList<Delivery> deliveries = new ArrayList<>();
         ArrayList<Move> droneMoves = new ArrayList<>();
         ArrayList<LngLatAlt> geojsonCoords = new ArrayList<>();
         ArrayList<Node> fullPath = new ArrayList<>();
         for (Order order: orders){
+            deliveries.add(new Delivery(order.getOrderNo(), order.getOrderStatus(), order.getOrderValidationCode(), order.getPriceTotalInPence()));
+            if (order.getOrderStatus() != OrderStatus.DELIVERED){
+                continue;
+            }
             ArrayList<Node> path = FindPath.findShortestPath(APPLETON_TOWER, orderValidator.restaurantWithPizza(order.getPizzasInOrder()[0], restaurants).location(), noFlyZones);
             if (path == null){
                 // This is a non-critical error that could happen if the program is given
@@ -150,6 +148,13 @@ public class Main {
                 System.err.println("Failed to calculate path for order: " + order);
             }
             fullPath.addAll(path);
+        }
+
+        try{
+            mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "deliveries-" + date + ".json"), deliveries);
+        } catch (Exception e) {
+            System.err.println("Failed to deliveries json file: " + e);
+            System.exit(1);
         }
 
         for (int i = 0; i < fullPath.size(); i++){
@@ -166,7 +171,7 @@ public class Main {
         }
 
         try{
-            mapper.writeValue(new File("/" + OUTPUT_FOLDER_NAME + "flightpath-" + date + ".json"), droneMoves);
+            mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "flightpath-" + date + ".json"), droneMoves);
         } catch (Exception e){
             System.err.println("Failed to create json file of the path: " + e);
             System.exit(1);
@@ -178,7 +183,7 @@ public class Main {
         featureCollection.add(feature);
 
         try{
-            mapper.writeValue(new File("/" + OUTPUT_FOLDER_NAME + "drone-" + date + ".geojson"), featureCollection);
+            mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "drone-" + date + ".geojson"), featureCollection);
         } catch (Exception e){
             System.err.println("Failed to create geojson file of the path: " + e);
             System.exit(1);

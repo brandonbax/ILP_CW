@@ -8,6 +8,8 @@ import uk.ac.ed.inf.ilp.interfaces.LngLatHandling;
 import static uk.ac.ed.inf.FindPath.NUM_OF_DIRECTIONS;
 
 public class LngLatHandler implements LngLatHandling {
+    // To account for inaccuracies in doubles
+    public static final double NEAR_ZERO = 1E-9;
     /**
      * @param startPosition is where the start is
      * @param endPosition is where the end is
@@ -61,12 +63,10 @@ public class LngLatHandler implements LngLatHandling {
             return false;
         }
 
-        // Padding on the start position of the cast ray, to ensure that it starts left of any polygon edge
-        double padding = 1E-5;
         // Starts the ray slightly left of the leftmost point in the polygon (so that the first edge is guaranteed to
         // be counted, even with precision errors) at the same y position as the point that is being checked.
         // This essentially gives a horizontal line which stops at the point we are checking
-        LngLat rayStartingPoint = new LngLat(minX - padding, position.lat());
+        LngLat rayStartingPoint = new LngLat(minX - NEAR_ZERO, position.lat());
         int intersections = 0;
         // Uses linear equations to check all the vertices in the polygon if they intersect with the ray
         for (int i = 0; i < region.vertices().length - 2; i++){
@@ -112,7 +112,12 @@ public class LngLatHandler implements LngLatHandling {
 
     @Override
     public LngLat nextPosition(LngLat startPosition, double angle) {
-        if (angle % ((2 * Math.PI) / NUM_OF_DIRECTIONS) != 0){
+        System.out.println(angle);
+        System.out.println((2 * Math.PI) / NUM_OF_DIRECTIONS);
+        System.out.println((angle % ((3.14159265358979) / 8)));
+        // Experiencing a very strange error where values of pi more precise than this, such as Math.PI will not
+        // calculate the modulo correctly and throw an exception.
+        if ((angle % ((2 * 3.14159265358979) / NUM_OF_DIRECTIONS)) > NEAR_ZERO){
             throw new RuntimeException("Invalid angle. Enter an angle on one of the 16 compass points");
         }
         // The next position can be found by breaking the vector into its component forms (longitude and latitude)

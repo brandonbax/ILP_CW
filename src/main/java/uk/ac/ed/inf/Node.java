@@ -9,7 +9,7 @@ public class Node {
     // The nodes position and parent will not change from when it is initialised, so these variables are final.
     // The A* value parameters are not set at initialisation so must be mutable.
     public final LngLat pos;
-    public double f;    // A* algorithm total cost function value.
+    public double f, g;    // A* algorithm function values.
     public final Node parent;
     public final double directionFromParent;
 
@@ -18,6 +18,7 @@ public class Node {
         this.parent = parent;
         this.directionFromParent = directionFromParent;
         f = 0;
+        g = 0;
     }
 
     @Override

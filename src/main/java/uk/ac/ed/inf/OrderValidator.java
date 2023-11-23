@@ -139,7 +139,7 @@ public class OrderValidator implements OrderValidation {
         }
 
         orderToValidate.setOrderValidationCode(OrderValidationCode.NO_ERROR);
-        orderToValidate.setOrderStatus(OrderStatus.VALID_BUT_NOT_DELIVERED);
+        orderToValidate.setOrderStatus(OrderStatus.DELIVERED);
         return orderToValidate;
     }
 

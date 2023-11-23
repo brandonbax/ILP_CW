@@ -1,6 +1,5 @@
 package uk.ac.ed.inf;
 
-import uk.ac.ed.inf.ilp.constant.SystemConstants;
 import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
 
@@ -9,19 +8,17 @@ import java.util.*;
 public class FindPath {
 
     public static final int NUM_OF_DIRECTIONS = 16;
-
-    // global defined variables for the search
-    private static PriorityQueue<Node> openSet;     // frontier
-    private static HashSet<Node> closedSet;         // visited
     private static final LngLatHandler lngLatHandler = new LngLatHandler();
 
     public static ArrayList<Node> findShortestPath(LngLat start, LngLat goal, NamedRegion[] noFlyZones){
+        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(c -> c.f));     // frontier
+        HashSet<Node> closedSet = new HashSet<>();         // visited
         Node startNode = new Node(null, 999, start);
+        startNode.f = lngLatHandler.distanceTo(start, goal);
         openSet.add(startNode);
 
         while (!openSet.isEmpty()){
             Node current = openSet.poll();
-
             closedSet.add(current);
 
             if (lngLatHandler.isCloseTo(current.pos, goal)){
@@ -59,7 +56,7 @@ public class FindPath {
                 }
 
                 // Calculates the cost function for this node and adds it to the openSet
-                neighbourNode.f = current.f + lngLatHandler.distanceTo(neighbourNode.pos, goal);
+                neighbourNode.f = current.g + lngLatHandler.distanceTo(neighbourNode.pos, goal);
                 openSet.add(neighbourNode);
             }
         }

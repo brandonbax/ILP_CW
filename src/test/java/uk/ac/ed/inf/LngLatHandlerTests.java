@@ -1,10 +1,9 @@
 package uk.ac.ed.inf;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
-
-import static org.junit.Assert.assertEquals;
 
 public class LngLatHandlerTests {
     LngLatHandler handler = new LngLatHandler();
@@ -15,7 +14,7 @@ public class LngLatHandlerTests {
         LngLat startPos = new LngLat(2, 3);
         LngLat endPos = new LngLat(4, 3);
 
-        assertEquals(handler.distanceTo(startPos, endPos), 2, 0.00001);
+        Assertions.assertEquals(handler.distanceTo(startPos, endPos), 2, 0.00001);
     }
     @Test
     public void testIsInRegion(){
