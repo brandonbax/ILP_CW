@@ -11,7 +11,7 @@ import uk.ac.ed.inf.ilp.interfaces.OrderValidation;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
-public class OrderSystemTests {
+public class OrderValidationTests {
     OrderValidation orderValidator;
     Pizza pizza1;
     Pizza pizza2;
@@ -28,7 +28,7 @@ public class OrderSystemTests {
 
     @Test
     public void testValid(){
-        Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2}, creditInfo);
+        Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
         Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.NO_ERROR);
@@ -38,7 +38,7 @@ public class OrderSystemTests {
     @Test
     public void testInvalidCardNum(){
         creditInfo.setCreditCardNumber("1234");
-        Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2}, creditInfo);
+        Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
         Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.CARD_NUMBER_INVALID);
@@ -48,7 +48,7 @@ public class OrderSystemTests {
     @Test
     public void testInvalidExpDate(){
         creditInfo.setCreditCardExpiry("75");
-        Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2}, creditInfo);
+        Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
         Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.EXPIRY_DATE_INVALID);
@@ -57,7 +57,7 @@ public class OrderSystemTests {
     @Test
     public void testOldExpDate(){
         creditInfo.setCreditCardExpiry("12/01");
-        Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2}, creditInfo);
+        Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
         Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.EXPIRY_DATE_INVALID);
@@ -66,7 +66,7 @@ public class OrderSystemTests {
     @Test
     public void testInvalidCvv(){
         creditInfo.setCvv("12");
-        Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2}, creditInfo);
+        Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
         Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.CVV_INVALID);

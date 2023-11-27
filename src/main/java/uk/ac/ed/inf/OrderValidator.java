@@ -45,7 +45,7 @@ public class OrderValidator implements OrderValidation {
                 orderToValidate.getCreditCardInformation().getCvv() == null ||
                 orderToValidate.getPizzasInOrder().length == 0 ||
                 definedRestaurants.length == 0){
-            throw new IllegalArgumentException("There cannot be null objects or empty lists");
+            throw new RuntimeException("There cannot be null objects or empty lists");
         }
 
         // Regex checks for a string containing only 16 digits from start to finish
@@ -79,12 +79,11 @@ public class OrderValidator implements OrderValidation {
         String[] monthAndYear = orderToValidate.getCreditCardInformation().getCreditCardExpiry().split("/");
         int month = Integer.parseInt(monthAndYear[0]);
         int year = Integer.parseInt("20" + monthAndYear[1]);
-        LocalDate currentDate = LocalDate.now();
         // Since credit card expiration dates do not have a day (effectively the last day of the month),
-        // the day is set to the current day so that it does not the comparison (if expDate and currentDate
-        // are in the same month and year, current date will not be after expDate).
-        LocalDate expDate = LocalDate.of(year, month, currentDate.getDayOfMonth());
-        if (currentDate.isAfter(expDate)){
+        // the day is set to the order day so that it does not the comparison (if expDate and orderDate
+        // are in the same month and year, order date will not be after expDate).
+        LocalDate expDate = LocalDate.of(year, month, orderToValidate.getOrderDate().getDayOfMonth());
+        if (orderToValidate.getOrderDate().isAfter(expDate)){
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
@@ -127,7 +126,7 @@ public class OrderValidator implements OrderValidation {
             }
         }
 
-        int totalOrderPrice = 0;
+        int totalOrderPrice = SystemConstants.ORDER_CHARGE_IN_PENCE;
         for (Pizza pizza: orderToValidate.getPizzasInOrder()){
             totalOrderPrice += pizza.priceInPence();
         }

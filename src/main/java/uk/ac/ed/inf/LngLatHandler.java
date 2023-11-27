@@ -5,7 +5,7 @@ import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.interfaces.LngLatHandling;
 
-import static uk.ac.ed.inf.FindPath.NUM_OF_DIRECTIONS;
+import static uk.ac.ed.inf.PathFinder.NUM_OF_DIRECTIONS;
 
 public class LngLatHandler implements LngLatHandling {
     // To account for inaccuracies in doubles
@@ -112,18 +112,15 @@ public class LngLatHandler implements LngLatHandling {
 
     @Override
     public LngLat nextPosition(LngLat startPosition, double angle) {
-        System.out.println(angle);
-        System.out.println((2 * Math.PI) / NUM_OF_DIRECTIONS);
-        System.out.println((angle % ((3.14159265358979) / 8)));
         // Experiencing a very strange error where values of pi more precise than this, such as Math.PI will not
         // calculate the modulo correctly and throw an exception.
-        if ((angle % ((2 * 3.14159265358979) / NUM_OF_DIRECTIONS)) > NEAR_ZERO){
+        if ((angle % (360.0 / NUM_OF_DIRECTIONS)) > NEAR_ZERO){
             throw new RuntimeException("Invalid angle. Enter an angle on one of the 16 compass points");
         }
         // The next position can be found by breaking the vector into its component forms (longitude and latitude)
         // and adding them to the start position.
-        double x = SystemConstants.DRONE_MOVE_DISTANCE * Math.cos(angle);
-        double y = SystemConstants.DRONE_MOVE_DISTANCE * Math.sin(angle);
+        double x = SystemConstants.DRONE_MOVE_DISTANCE * Math.cos(Math.toRadians(angle));
+        double y = SystemConstants.DRONE_MOVE_DISTANCE * Math.sin(Math.toRadians(angle));
         return new LngLat(startPosition.lng() + x, startPosition.lat() + y);
     }
 }
