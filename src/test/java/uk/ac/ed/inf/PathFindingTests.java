@@ -2,7 +2,6 @@ package uk.ac.ed.inf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.ed.inf.ilp.constant.OrderStatus;
@@ -14,6 +13,7 @@ import uk.ac.ed.inf.ilp.data.Restaurant;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class PathFindingTests {
     ObjectMapper mapper = new ObjectMapper();
@@ -135,5 +135,13 @@ public class PathFindingTests {
                 assert (!lngLatHandler.isInRegion(move.endPos(), noFlyZone));
             }
         }
+    }
+
+    @Test
+    void singleIncalculablePath(){
+        PathFinder pathFinder = new PathFinder();
+        // Tries to find path from AT to the middle of a no-fly zone
+        ArrayList<Node> path = pathFinder.findShortestPath(ioHandler.APPLETON_TOWER, new LngLat(-3.1888, 55.9437), ioHandler.getNoFlyZones(), ioHandler.getCentralArea());
+        Assertions.assertNull(path);
     }
 }

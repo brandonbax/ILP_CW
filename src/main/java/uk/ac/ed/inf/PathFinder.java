@@ -11,6 +11,13 @@ public class PathFinder {
     public static final int NUM_OF_DIRECTIONS = 16;
     private final LngLatHandler lngLatHandler = new LngLatHandler();
 
+    /**
+     * @param start is the start of the path
+     * @param goal is the goal of the path
+     * @param noFlyZones are the no-fly zones
+     * @param centralArea is the central area
+     * @return the shortest path from {@code start} to {@code goal} or null if there is no path
+     */
     public ArrayList<Node> findShortestPath(LngLat start, LngLat goal, NamedRegion[] noFlyZones, NamedRegion centralArea){
         PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(c -> c.f));     // frontier
         HashSet<Node> closedSet = new HashSet<>();         // visited

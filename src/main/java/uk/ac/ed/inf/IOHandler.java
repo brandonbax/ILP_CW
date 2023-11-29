@@ -189,8 +189,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "deliveries-" + date + ".json"), deliveries);
         } catch (Exception e) {
-            System.err.println("Failed to deliveries json file");
-            System.exit(1);
+            throw new RuntimeException("Failed to generate deliveries file");
         }
 
         // Removes the hover node at the start of the path
@@ -223,8 +222,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "flightpath-" + date + ".json"), droneMoves);
         } catch (Exception e){
-            System.err.println("Failed to create json file of the path");
-            System.exit(1);
+            throw new RuntimeException("Failed to generate flightpath file");
         }
 
         FeatureCollection featureCollection = new FeatureCollection();
@@ -235,8 +233,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "drone-" + date + ".geojson"), featureCollection);
         } catch (Exception e){
-            System.err.println("Failed to create geojson file of the path");
-            System.exit(1);
+            throw new RuntimeException("Failed to generate geojson file");
         }
     }
 }
