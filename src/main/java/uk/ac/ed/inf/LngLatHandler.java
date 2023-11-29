@@ -34,6 +34,11 @@ public class LngLatHandler implements LngLatHandling {
         return distanceTo(startPosition, otherPosition) <= SystemConstants.DRONE_IS_CLOSE_DISTANCE;
     }
 
+    /**
+     * @param position is the position to check
+     * @param region is the region that the position is checked to be in
+     * @return if the given position is inside the given region
+     */
     @Override
     public boolean isInRegion(LngLat position, NamedRegion region) {
         // Sets initial values for finding max and min
@@ -110,6 +115,11 @@ public class LngLatHandler implements LngLatHandling {
         return a2 * b1 != 0;
     }
 
+    /**
+     * @param startPosition is the starting position
+     * @param angle is the angle of the direction of movement, starting from East and going round anti-clockwise
+     * @return the position after the movement has been made
+     */
     @Override
     public LngLat nextPosition(LngLat startPosition, double angle) {
         // Experiencing a very strange error where values of pi more precise than this, such as Math.PI will not

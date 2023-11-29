@@ -24,7 +24,7 @@ public class Main {
             date = LocalDate.parse(args[0]);
         } catch (DateTimeParseException e) {
             System.err.println("The first argument provided is not in a valid date format");
-            System.exit(1);
+            System.exit(2);
         }
 
         String baseUrl = args[1];
@@ -36,7 +36,7 @@ public class Main {
             new URL(baseUrl).toURI();
         } catch (Exception e) {
             System.err.println(baseUrl + " is not a valid URL");
-            System.exit(1);
+            System.exit(3);
         }
 
         IOHandler ioHandler = new IOHandler();
@@ -44,7 +44,7 @@ public class Main {
             ioHandler.readRestData(baseUrl, date);
         } catch (RuntimeException e){
             System.err.println("failed to read rest data: " + e);
-            System.exit(1);
+            System.exit(4);
         }
 
         Restaurant[] restaurants = ioHandler.getRestaurants();
@@ -55,19 +55,18 @@ public class Main {
             for (Order order: orders){
                 orderValidator.validateOrder(order, restaurants);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (RuntimeException e) {
             System.err.println("Null values are present in the data in the rest service");
-            System.exit(1);
+            System.exit(5);
         }
 
         PathFinder pathFinder = new PathFinder();
-        LngLatHandler lngLatHandler = new LngLatHandler();
 
         try {
-            ioHandler.writeOutputFiles(orderValidator, pathFinder, lngLatHandler, date);
+            ioHandler.writeOutputFiles(orderValidator, pathFinder);
         } catch (RuntimeException e){
             System.err.println("Failed to write files: " + e);
-            System.exit(1);
+            System.exit(6);
         }
     }
 }

@@ -17,7 +17,7 @@ public class OrderValidator implements OrderValidation {
     /**
      * validate an order and deliver a validated version where the
      * OrderStatus and OrderValidationCode are set accordingly.
-     *
+     * <p>
      * The order validation code is defined in the enum @link uk.ac.ed.inf.ilp.constant.OrderValidationStatus
      *
      * <p>

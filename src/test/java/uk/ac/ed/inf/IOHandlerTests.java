@@ -19,14 +19,48 @@ public class IOHandlerTests {
         assert ioHandler.getNoFlyZones() != null;
         assert ioHandler.getCentralArea() != null;
     }
-
     @Test
     void invalidRestaurantUrl(){
         IOHandler ioHandler = new IOHandler("123", "orders", "centralArea", "noFlyZones", "resultfiles/", new LngLat(-3.186874, 55.944494));
         try {
             ioHandler.readRestData(baseUrl, date);
-        } catch (RuntimeException e){
-
+            Assertions.fail("An exception should have been thrown");
+        } catch (Exception ex){
+            Assertions.assertEquals(RuntimeException.class, ex.getClass());
+            Assertions.assertEquals("Error reading restaurants from REST service", ex.getMessage());
+        }
+    }
+    @Test
+    void invalidOrdersUrl(){
+        IOHandler ioHandler = new IOHandler("restaurants", "123", "centralArea", "noFlyZones", "resultfiles/", new LngLat(-3.186874, 55.944494));
+        try {
+            ioHandler.readRestData(baseUrl, date);
+            Assertions.fail("An exception should have been thrown");
+        } catch (Exception ex){
+            Assertions.assertEquals(RuntimeException.class, ex.getClass());
+            Assertions.assertEquals("Error reading orders from REST service", ex.getMessage());
+        }
+    }
+    @Test
+    void invalidCentralAreaUrl(){
+        IOHandler ioHandler = new IOHandler("restaurants", "orders", "123", "noFlyZones", "resultfiles/", new LngLat(-3.186874, 55.944494));
+        try {
+            ioHandler.readRestData(baseUrl, date);
+            Assertions.fail("An exception should have been thrown");
+        } catch (Exception ex){
+            Assertions.assertEquals(RuntimeException.class, ex.getClass());
+            Assertions.assertEquals("Error reading centralArea from REST service", ex.getMessage());
+        }
+    }
+    @Test
+    void invalidNoFlyZonesUrl(){
+        IOHandler ioHandler = new IOHandler("restaurants", "orders", "centralArea", "123", "resultfiles/", new LngLat(-3.186874, 55.944494));
+        try {
+            ioHandler.readRestData(baseUrl, date);
+            Assertions.fail("An exception should have been thrown");
+        } catch (Exception ex){
+            Assertions.assertEquals(RuntimeException.class, ex.getClass());
+            Assertions.assertEquals("Error reading noFlyZones from REST service", ex.getMessage());
         }
     }
 }

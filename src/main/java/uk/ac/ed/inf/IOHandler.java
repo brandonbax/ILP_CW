@@ -7,7 +7,6 @@ import org.geojson.FeatureCollection;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import uk.ac.ed.inf.ilp.constant.OrderStatus;
-import uk.ac.ed.inf.ilp.constant.SystemConstants;
 import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.data.Order;
@@ -30,10 +29,12 @@ public class IOHandler {
     public final String NO_FLY_ZONE_URL;
     public final String OUTPUT_FOLDER_NAME;
     public final LngLat APPLETON_TOWER;
-
-    public void setOrders(Order[] orders) {
-        this.orders = orders;
-    }
+    private Restaurant[] restaurants;
+    private Order[] orders;
+    private NamedRegion centralArea;
+    private NamedRegion[] noFlyZones;
+    private LocalDate date;
+    ObjectMapper mapper = new ObjectMapper();
 
     public NamedRegion getCentralArea() {
         return centralArea;
@@ -46,19 +47,14 @@ public class IOHandler {
     public void setNoFlyZones(NamedRegion[] noFlyZones) {
         this.noFlyZones = noFlyZones;
     }
-
-    private Restaurant[] restaurants;
-    private Order[] orders;
-    private NamedRegion centralArea;
-    private NamedRegion[] noFlyZones;
-    ObjectMapper mapper = new ObjectMapper();
-
     public Restaurant[] getRestaurants() {
         return restaurants;
     }
-
     public Order[] getOrders() {
         return orders;
+    }
+    public void setOrders(Order[] orders) {
+        this.orders = orders;
     }
 
     public IOHandler(){
@@ -66,6 +62,7 @@ public class IOHandler {
         this.orders = null;
         this.centralArea = null;
         this.noFlyZones = null;
+        this.date = null;
         RESTAURANT_URL = "restaurants";
         ORDER_URL = "orders";
         CENTRAL_AREA_URL = "centralArea";
@@ -80,6 +77,7 @@ public class IOHandler {
         this.orders = null;
         this.centralArea = null;
         this.noFlyZones = null;
+        this.date = null;
         RESTAURANT_URL = restaurantUrl;
         ORDER_URL = orderUrl;
         CENTRAL_AREA_URL = centralAreaUrl;
@@ -87,13 +85,19 @@ public class IOHandler {
         OUTPUT_FOLDER_NAME = outputFolderName;
         APPLETON_TOWER = appletonTower;
     }
+    /**
+     * This method will fill the IOHandler object's attributes with the deserialised data from the REST service.
+     * @param baseUrl is the base URL that is used to access each subdirectory in the domain
+     * @param date is the date used to retrieve orders
+     */
     public void readRestData(String baseUrl, LocalDate date){
         mapper.registerModule(new JavaTimeModule());
+        this.date = date;
 
         try {
             restaurants = mapper.readValue(new URL(baseUrl + RESTAURANT_URL), Restaurant[].class);
         } catch (IOException e) {
-            throw new RuntimeException("Error reading restaurants from REST service: " + e);
+            throw new RuntimeException("Error reading restaurants from REST service");
         }
 
         try {
@@ -102,27 +106,31 @@ public class IOHandler {
                 throw new RuntimeException("No orders on: " + date);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error reading orders from REST service: " + e);
+            throw new RuntimeException("Error reading orders from REST service");
         }
 
         try {
             centralArea = mapper.readValue(new URL(baseUrl + CENTRAL_AREA_URL), NamedRegion.class);
         } catch (IOException e) {
-            throw new RuntimeException("Error reading centralArea from REST service: " + e);
+            throw new RuntimeException("Error reading centralArea from REST service");
         }
 
         try {
             noFlyZones = mapper.readValue(new URL(baseUrl + NO_FLY_ZONE_URL), NamedRegion[].class);
         } catch (IOException e) {
-            throw new RuntimeException("Error reading noFlyZones from REST service: " + e);
+            throw new RuntimeException("Error reading noFlyZones from REST service");
         }
     }
-
-    public void writeOutputFiles(OrderValidator orderValidator, PathFinder pathFinder, LngLatHandler lngLatHandler, LocalDate date){
+    /**
+     * This method will fill the IOHandler object's attributes with the deserialised data from the REST service.
+     * @param orderValidator is the orderValidator object used in the method
+     * @param pathFinder is the pathFinder object used in the method
+     */
+    public void writeOutputFiles(OrderValidator orderValidator, PathFinder pathFinder){
         try {
             Files.createDirectories(Paths.get("./" + OUTPUT_FOLDER_NAME));
         } catch (Exception e){
-            throw new RuntimeException("Failed to create output folder: " + e);
+            throw new RuntimeException("Failed to create output folder");
         }
 
         // Since there may be multiple orders to the same restaurant within a day, it would be more efficient to reuse
@@ -159,14 +167,16 @@ public class IOHandler {
 
                 // Creates a shallow copy of the restaurant to AT
                 path = new ArrayList<>(pathToRestaurant);
+                // A hover node is added at the end where the restaurant is and the hover node at the start (appleton tower) is removed
+                Node hoverNode = new Node(restaurant.location());
+                hoverNode.directionFromParent = 999;
+                pathToRestaurant.add(hoverNode);
+                pathToRestaurant.remove(0);
                 // The path from AT to the restaurant is reversed then added to path which gives the path from AT to the
                 // restaurant and back
                 Collections.reverse(pathToRestaurant);
                 path.addAll(pathToRestaurant);
                 // Adds a new node that represents the drone hovering when it arrives back to appleton tower
-                Node hoverNode = new Node(APPLETON_TOWER);
-                hoverNode.directionFromParent = 999;
-                path.add(hoverNode);
 
                 // Store the path in the cache for future use
                 cachedPaths.put(restaurant, path);
@@ -179,12 +189,16 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "deliveries-" + date + ".json"), deliveries);
         } catch (Exception e) {
-            System.err.println("Failed to deliveries json file: " + e);
+            System.err.println("Failed to deliveries json file");
             System.exit(1);
         }
 
         // Removes the hover node at the start of the path
         fullPath.remove(0);
+        // Adds a hover node at the end of the path
+        Node hoverNode = new Node(APPLETON_TOWER);
+        hoverNode.directionFromParent = 999;
+        fullPath.add(hoverNode);
         // The return path needs to have its angle flipped, so this flag will alternate each time the drone hovers
         // (indicating that it has changed directions).
         // This is done instead of creating new nodes for the return path (make a deep copy instead of shallow) to save memory.
@@ -209,7 +223,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "flightpath-" + date + ".json"), droneMoves);
         } catch (Exception e){
-            System.err.println("Failed to create json file of the path: " + e);
+            System.err.println("Failed to create json file of the path");
             System.exit(1);
         }
 
@@ -221,7 +235,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "drone-" + date + ".geojson"), featureCollection);
         } catch (Exception e){
-            System.err.println("Failed to create geojson file of the path: " + e);
+            System.err.println("Failed to create geojson file of the path");
             System.exit(1);
         }
     }
