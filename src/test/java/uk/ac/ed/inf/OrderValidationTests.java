@@ -31,8 +31,17 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.NO_ERROR);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.DELIVERED);
+        Assertions.assertEquals(OrderValidationCode.NO_ERROR, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.DELIVERED, order.getOrderStatus());
+    }
+
+    @Test
+    public void testEndMonth(){
+        Order order = new Order("1", LocalDate.of(2023, 10, 31), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
+        orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
+
+        Assertions.assertEquals(OrderValidationCode.NO_ERROR, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.DELIVERED, order.getOrderStatus());
     }
 
     @Test
@@ -41,8 +50,8 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.CARD_NUMBER_INVALID);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.CARD_NUMBER_INVALID, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
 
     @Test
@@ -51,8 +60,8 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.EXPIRY_DATE_INVALID);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.EXPIRY_DATE_INVALID, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testOldExpDate(){
@@ -60,8 +69,8 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.EXPIRY_DATE_INVALID);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.EXPIRY_DATE_INVALID, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testInvalidCvv(){
@@ -69,16 +78,16 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.CVV_INVALID);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.CVV_INVALID, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testTotalIncorrect(){
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 160, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.TOTAL_INCORRECT);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.TOTAL_INCORRECT, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testUndefinedPizza(){
@@ -86,16 +95,16 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza3}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.PIZZA_NOT_DEFINED);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.PIZZA_NOT_DEFINED, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testTooManyPizza(){
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2, pizza1, pizza2, pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.MAX_PIZZA_COUNT_EXCEEDED);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.MAX_PIZZA_COUNT_EXCEEDED, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testMultipleRestaurants(){
@@ -105,8 +114,8 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 250, new Pizza[]{pizza1, pizza2, pizza3}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant1, restaurant2});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
     @Test
     public void testRestaurantClosed(){
@@ -114,7 +123,7 @@ public class OrderValidationTests {
         Order order = new Order("1", LocalDate.of(2023, 10, 10), 150, new Pizza[]{pizza1, pizza2}, creditInfo);
         orderValidator.validateOrder(order, new Restaurant[]{restaurant2});
 
-        Assertions.assertEquals(order.getOrderValidationCode(), OrderValidationCode.RESTAURANT_CLOSED);
-        Assertions.assertEquals(order.getOrderStatus(), OrderStatus.INVALID);
+        Assertions.assertEquals(OrderValidationCode.RESTAURANT_CLOSED, order.getOrderValidationCode());
+        Assertions.assertEquals(OrderStatus.INVALID, order.getOrderStatus());
     }
 }

@@ -1,19 +1,21 @@
 package uk.ac.ed.inf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import org.junit.jupiter.api.*;
 import uk.ac.ed.inf.ilp.constant.OrderStatus;
 import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.data.Order;
-import uk.ac.ed.inf.ilp.data.Restaurant;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class PathFindingTests {
     ObjectMapper mapper = new ObjectMapper();
@@ -22,16 +24,63 @@ public class PathFindingTests {
     static LngLatHandler lngLatHandler = new LngLatHandler();
     static OrderValidator orderValidator = new OrderValidator();
     static PathFinder pathFinder = new PathFinder();
-    @BeforeEach
-    void generateResults(){
-        ioHandler.readRestData("https://ilp-rest.azurewebsites.net/", date);
+    static WireMockServer wireMockServer;
 
-        Restaurant[] restaurants = ioHandler.getRestaurants();
-        Order[] orders = ioHandler.getOrders();
+    @BeforeAll
+    public static void setUp() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8080));
+        wireMockServer.start();
 
-        for (Order order: orders) {
-            orderValidator.validateOrder(order, restaurants);
-        }
+        // Configure WireMock
+        WireMock.configureFor("localhost", 8080);
+
+        // Stub for 2025-01-13
+        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-13"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("orders_2025-01-13.json")));
+
+        // Stub for 2025-01-14
+//        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-14"))
+//                .willReturn(aResponse()
+//                        .withHeader("Content-Type", "application/json")
+//                        .withBodyFile("orders_2025-01-14.json")));
+    }
+
+//    @BeforeEach
+//    void generateResults(){
+//        ioHandler.readRestData("https://ilp-rest.azurewebsites.net/", date);
+//
+//        Restaurant[] restaurants = ioHandler.getRestaurants();
+//        Order[] orders = ioHandler.getOrders();
+//
+//        for (Order order: orders) {
+//            orderValidator.validateOrder(order, restaurants);
+//        }
+//    }
+
+    @AfterAll
+    public static void tearDown() {
+        wireMockServer.stop();
+    }
+
+    @Test
+    public void testGetOrdersByDate() throws Exception {
+        // Example: Make a request to the mock API
+        var client = java.net.http.HttpClient.newHttpClient();
+        var request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:8080/orders/2025-01-13"))
+                .GET()
+                .build();
+
+        var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        // Print the response
+        System.out.println(response.body());
+
+        // Assertions
+        assert response.body().contains("0C65E619");
+        assert !response.body().contains("1D45F520");
     }
 
     @Test

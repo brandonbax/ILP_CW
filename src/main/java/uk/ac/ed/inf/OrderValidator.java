@@ -9,6 +9,7 @@ import uk.ac.ed.inf.ilp.data.Restaurant;
 import uk.ac.ed.inf.ilp.interfaces.OrderValidation;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,7 +83,7 @@ public class OrderValidator implements OrderValidation {
         // Since credit card expiration dates do not have a day (effectively the last day of the month),
         // the day is set to the order day so that it does not the comparison (if expDate and orderDate
         // are in the same month and year, order date will not be after expDate).
-        LocalDate expDate = LocalDate.of(year, month, orderToValidate.getOrderDate().getDayOfMonth());
+        LocalDate expDate = LocalDate.of(year, month, YearMonth.of(year, month).lengthOfMonth());
         if (orderToValidate.getOrderDate().isAfter(expDate)){
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
