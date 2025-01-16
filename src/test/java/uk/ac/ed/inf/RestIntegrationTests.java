@@ -6,9 +6,12 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.data.Order;
+import uk.ac.ed.inf.ilp.data.Restaurant;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -29,6 +32,21 @@ public class RestIntegrationTests {
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("orders_2025-01-13.json")));
 
+        wireMockServer.stubFor(get(urlPathEqualTo("/restaurants"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("restaurants.json")));
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/noFlyZones"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("noFlyZones.json")));
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/centralArea"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("centralArea.json")));
+
         // Stub for 2025-01-14
 //        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-14"))
 //                .willReturn(aResponse()
@@ -43,7 +61,6 @@ public class RestIntegrationTests {
 
     @Test
     public void testGetOrdersByDate() throws Exception {
-        // Example: Make a request to the mock API
         var client = java.net.http.HttpClient.newHttpClient();
         var request = java.net.http.HttpRequest.newBuilder()
                 .uri(java.net.URI.create("http://localhost:8080/orders/2025-01-13"))
@@ -58,11 +75,67 @@ public class RestIntegrationTests {
         // Deserialize the JSON response into a list of Order objects
         Order[] orders = mapper.readValue(response.body(), Order[].class);
 
-        // Print the response
-        System.out.println(response.body());
+        String firstOrderId = orders[0].getOrderNo();
+        Assertions.assertEquals("0C65E619", firstOrderId);
+    }
 
-        // Assertions
-        assert response.body().contains("0C65E619");
-        assert !response.body().contains("1D45F520");
+    @Test
+    public void testGetRestaurants() throws Exception {
+        var client = java.net.http.HttpClient.newHttpClient();
+        var request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:8080/restaurants"))
+                .GET()
+                .build();
+
+        var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        // Deserialize the JSON response into a list of Order objects
+        Restaurant[] restaurants = mapper.readValue(response.body(), Restaurant[].class);
+
+        String firstRestaurantName = restaurants[0].name();
+        Assertions.assertEquals("Civerinos Slice", firstRestaurantName);
+    }
+
+    @Test
+    public void testGetNoFlyZones() throws Exception {
+        var client = java.net.http.HttpClient.newHttpClient();
+        var request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:8080/noFlyZones"))
+                .GET()
+                .build();
+
+        var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        // Deserialize the JSON response into a list of Order objects
+        NamedRegion[] noFlyZones = mapper.readValue(response.body(), NamedRegion[].class);
+
+        String firstNoFlyZoneName = noFlyZones[0].name();
+        Assertions.assertEquals("George Square Area", firstNoFlyZoneName);
+    }
+
+    @Test
+    public void testGetCentralArea() throws Exception {
+        var client = java.net.http.HttpClient.newHttpClient();
+        var request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:8080/centralArea"))
+                .GET()
+                .build();
+
+        var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        // Deserialize the JSON response into a list of Order objects
+        NamedRegion centralArea = mapper.readValue(response.body(), NamedRegion.class);
+
+        String centralAreaName = centralArea.name();
+        Assertions.assertEquals("central", centralAreaName);
     }
 }
