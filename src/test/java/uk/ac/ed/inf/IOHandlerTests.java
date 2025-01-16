@@ -1,15 +1,38 @@
 package uk.ac.ed.inf;
 
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.ed.inf.ilp.data.LngLat;
 
 import java.time.LocalDate;
 
 public class IOHandlerTests {
-    String baseUrl = "https://ilp-rest.azurewebsites.net/";
-    LocalDate date = LocalDate.parse("2023-11-27");
+    String baseUrl = "http://localhost:8083/";
+    LocalDate date = LocalDate.parse("2025-01-13");
+    static WireMockServer wireMockServer;
+
+    @BeforeAll
+    public static void setUp() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8083));
+        wireMockServer.start();
+
+        // Configure WireMock
+        WireMock.configureFor("localhost", 8083);
+
+        configureMockServer.configure(wireMockServer);
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        wireMockServer.stop();
+    }
+
     @Test
     void readRestData(){
         IOHandler ioHandler = new IOHandler();

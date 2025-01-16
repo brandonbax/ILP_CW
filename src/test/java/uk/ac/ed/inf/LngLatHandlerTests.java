@@ -14,7 +14,7 @@ public class LngLatHandlerTests {
         LngLat startPos = new LngLat(2, 3);
         LngLat endPos = new LngLat(4, 3);
 
-        Assertions.assertEquals(handler.distanceTo(startPos, endPos), 2, 0.00001);
+        Assertions.assertEquals(2, handler.distanceTo(startPos, endPos), 0.00001);
     }
     @Test
     void testIsInRegion(){

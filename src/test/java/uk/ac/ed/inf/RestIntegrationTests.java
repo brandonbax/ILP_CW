@@ -13,8 +13,6 @@ import uk.ac.ed.inf.ilp.data.NamedRegion;
 import uk.ac.ed.inf.ilp.data.Order;
 import uk.ac.ed.inf.ilp.data.Restaurant;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-
 public class RestIntegrationTests {
     static WireMockServer wireMockServer;
 
@@ -26,32 +24,8 @@ public class RestIntegrationTests {
         // Configure WireMock
         WireMock.configureFor("localhost", 8080);
 
-        // Stub for 2025-01-13
-        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-13"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("orders_2025-01-13.json")));
+        configureMockServer.configure(wireMockServer);
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/restaurants"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("restaurants.json")));
-
-        wireMockServer.stubFor(get(urlPathEqualTo("/noFlyZones"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("noFlyZones.json")));
-
-        wireMockServer.stubFor(get(urlPathEqualTo("/centralArea"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("centralArea.json")));
-
-        // Stub for 2025-01-14
-//        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-14"))
-//                .willReturn(aResponse()
-//                        .withHeader("Content-Type", "application/json")
-//                        .withBodyFile("orders_2025-01-14.json")));
     }
 
     @AfterAll

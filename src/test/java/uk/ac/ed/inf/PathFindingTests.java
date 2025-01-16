@@ -15,12 +15,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-
 public class PathFindingTests {
     ObjectMapper mapper = new ObjectMapper();
     static IOHandler ioHandler = new IOHandler();
-    static LocalDate date = LocalDate.parse("2023-11-23");
+    static LocalDate date = LocalDate.parse("2025-01-13");
     static LngLatHandler lngLatHandler = new LngLatHandler();
     static OrderValidator orderValidator = new OrderValidator();
     static PathFinder pathFinder = new PathFinder();
@@ -28,59 +26,23 @@ public class PathFindingTests {
 
     @BeforeAll
     public static void setUp() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8080));
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8081));
         wireMockServer.start();
 
         // Configure WireMock
-        WireMock.configureFor("localhost", 8080);
+        WireMock.configureFor("localhost", 8081);
 
-        // Stub for 2025-01-13
-        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-13"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("orders_2025-01-13.json")));
-
-        // Stub for 2025-01-14
-//        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-14"))
-//                .willReturn(aResponse()
-//                        .withHeader("Content-Type", "application/json")
-//                        .withBodyFile("orders_2025-01-14.json")));
+        configureMockServer.configure(wireMockServer);
     }
-
-//    @BeforeEach
-//    void generateResults(){
-//        ioHandler.readRestData("https://ilp-rest.azurewebsites.net/", date);
-//
-//        Restaurant[] restaurants = ioHandler.getRestaurants();
-//        Order[] orders = ioHandler.getOrders();
-//
-//        for (Order order: orders) {
-//            orderValidator.validateOrder(order, restaurants);
-//        }
-//    }
 
     @AfterAll
     public static void tearDown() {
         wireMockServer.stop();
     }
 
-    @Test
-    public void testGetOrdersByDate() throws Exception {
-        // Example: Make a request to the mock API
-        var client = java.net.http.HttpClient.newHttpClient();
-        var request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("http://localhost:8080/orders/2025-01-13"))
-                .GET()
-                .build();
-
-        var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
-
-        // Print the response
-        System.out.println(response.body());
-
-        // Assertions
-        assert response.body().contains("0C65E619");
-        assert !response.body().contains("1D45F520");
+    @BeforeEach
+    void generateResults() {
+        ioHandler.readRestData("http://localhost:8081/", date);
     }
 
     @Test
@@ -178,6 +140,7 @@ public class PathFindingTests {
             Assertions.fail();
         }
 
+        // Checks that the path is not in a no-fly zone
         for (Move move: flightpath){
             for (NamedRegion noFlyZone: ioHandler.getNoFlyZones()) {
                 assert (!lngLatHandler.isInRegion(move.startPos(), noFlyZone));
