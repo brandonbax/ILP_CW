@@ -30,7 +30,7 @@ public class MainTest {
     }
 
     @Test
-    void mainNormal(){
+    void testNormal(){
         Main.main(args);
     }
 }
