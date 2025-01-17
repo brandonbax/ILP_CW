@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class PathFindingTests {
+public class PathFindingSystemTests {
     ObjectMapper mapper = new ObjectMapper();
     static IOHandler ioHandler = new IOHandler();
     static LocalDate date = LocalDate.parse("2025-01-13");
