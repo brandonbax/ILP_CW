@@ -28,4 +28,12 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn clean install -B  # Use -B for batch mode (non-interactive)
+
+    # Step 5: Run tests
+    - name: Run tests
+      run: mvn test -B
+
+    # Step 6: Verify and package
+    - name: Verify and Package
+      run: mvn verify package -B
