@@ -30,6 +30,10 @@ jobs:
     - name: Build with Maven
       run: mvn clean install -B  # Use -B for batch mode (non-interactive)
 
+    - name: Run Pitest Mutation Testing
+      run: mvn org.pitest:pitest-maven:mutationCoverage -B
+
+
     # package
     - name: Package
       run: mvn package -B
