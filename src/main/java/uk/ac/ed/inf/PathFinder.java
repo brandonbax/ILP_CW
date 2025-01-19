@@ -34,7 +34,7 @@ public class PathFinder {
             // To prevent a heap overflow, if a path cannot be calculated within a certain number of loops,
             // then the method should return null. The number could probably be lower, however, I don't want
             // the method to fail when there is a hard to calculate path.
-            if (closedSet.size() > 500000){
+            if (closedSet.size() > 300000){
                 return null;
             }
             Node current = openSet.poll();
