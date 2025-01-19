@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
+@Timeout(value=60, unit=TimeUnit.SECONDS)
 public class PathFindingSystemTests {
     ObjectMapper mapper = new ObjectMapper();
     static IOHandler ioHandler = new IOHandler();
