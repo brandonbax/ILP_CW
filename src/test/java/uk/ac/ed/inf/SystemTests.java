@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 public class SystemTests {
     String baseUrl = "http://localhost:8082/";
-    String date = "2025-01-13";
-    String[] args = {date, baseUrl};
+//    String date = "2025-01-13";
+//    String[] args = {date, baseUrl};
     static WireMockServer wireMockServer;
 
     @BeforeAll
@@ -30,7 +30,7 @@ public class SystemTests {
     }
 
     @Test
-    void testNormal(){
-        Main.main(args);
+    void testEasy(){
+        Main.main(new String[]{"2025-01-13", baseUrl});
     }
 }

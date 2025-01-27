@@ -196,6 +196,7 @@ public class IOHandler {
         } catch (Exception e) {
             logger.error("Error writing deliveries");
         }
+        logger.info("Outputted deliveries to {}deliveries-{}.json", OUTPUT_FOLDER_NAME, date);
 
         // Removes the hover node at the start of the path
         fullPath.remove(0);
@@ -229,6 +230,7 @@ public class IOHandler {
         } catch (Exception e){
             logger.error("Error writing flightpath");
         }
+        logger.info("Outputted flightpath to {}flightpath-{}.json", OUTPUT_FOLDER_NAME, date);
 
         FeatureCollection featureCollection = new FeatureCollection();
         Feature feature = new Feature();
@@ -240,5 +242,6 @@ public class IOHandler {
         } catch (Exception e){
             logger.error("Error writing geojson file");
         }
+        logger.info("Outputted geojson to {}geojson-{}.geojson", OUTPUT_FOLDER_NAME, date);
     }
 }

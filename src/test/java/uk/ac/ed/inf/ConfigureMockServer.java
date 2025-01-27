@@ -13,6 +13,11 @@ public class ConfigureMockServer {
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("orders_2025-01-13.json")));
 
+        wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-20"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("many_orders.json")));
+
         wireMockServer.stubFor(get(urlPathEqualTo("/restaurants"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
