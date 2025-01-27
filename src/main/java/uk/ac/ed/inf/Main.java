@@ -7,15 +7,15 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-/**
- * Hello world!
- *
- */
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public class Main {
+    private static final Logger logger = LogManager.getLogger();
 
     public static void main( String[] args ) {
         if (args.length != 2){
-            System.err.println("There must be 2 arguments");
+            logger.fatal("There must be 2 arguments");
             System.exit(1);
         }
 
@@ -23,7 +23,7 @@ public class Main {
         try{
             date = LocalDate.parse(args[0]);
         } catch (DateTimeParseException e) {
-            System.err.println("The first argument provided is not in a valid date format");
+            logger.fatal("The first argument provided is not in a valid date format");
             System.exit(2);
         }
 
@@ -35,7 +35,7 @@ public class Main {
         try{
             new URL(baseUrl).toURI();
         } catch (Exception e) {
-            System.err.println(baseUrl + " is not a valid URL");
+            logger.fatal("{} is not a valid URL", baseUrl);
             System.exit(3);
         }
 
@@ -43,7 +43,7 @@ public class Main {
         try {
             ioHandler.readRestData(baseUrl, date);
         } catch (RuntimeException e){
-            System.err.println("failed to read rest data: " + e);
+            logger.fatal("failed to read rest data: {}", String.valueOf(e));
             System.exit(4);
         }
 
@@ -65,7 +65,7 @@ public class Main {
         try {
             ioHandler.writeOutputFiles(orderValidator, pathFinder);
         } catch (RuntimeException e){
-            System.err.println("Failed to write files: " + e);
+            logger.fatal("Failed to write files: {}", String.valueOf(e));
             System.exit(6);
         }
     }

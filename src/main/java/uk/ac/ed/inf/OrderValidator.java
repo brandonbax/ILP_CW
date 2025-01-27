@@ -1,5 +1,7 @@
 package uk.ac.ed.inf;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import uk.ac.ed.inf.ilp.constant.OrderStatus;
 import uk.ac.ed.inf.ilp.constant.OrderValidationCode;
 import uk.ac.ed.inf.ilp.constant.SystemConstants;
@@ -15,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OrderValidator implements OrderValidation {
+    private static final Logger logger = LogManager.getLogger();
     /**
      * validate an order and deliver a validated version where the
      * OrderStatus and OrderValidationCode are set accordingly.
@@ -38,6 +41,7 @@ public class OrderValidator implements OrderValidation {
      */
     @Override
     public Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants) {
+        logger.info("Validating order: {}", orderToValidate.getOrderNo());
         // Checks that the order contains credit card information, since it is possible to create
         // an Order object without it.
         if (orderToValidate.getCreditCardInformation() == null ||
@@ -53,6 +57,7 @@ public class OrderValidator implements OrderValidation {
         Pattern pattern = Pattern.compile("^\\d{16}$");
         Matcher matcher = pattern.matcher(orderToValidate.getCreditCardInformation().getCreditCardNumber());
         if (!matcher.find()){
+            logger.warn("Validation failed: Invalid card number for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.CARD_NUMBER_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
@@ -62,6 +67,7 @@ public class OrderValidator implements OrderValidation {
         pattern = Pattern.compile("^\\d{3}$");
         matcher = pattern.matcher(orderToValidate.getCreditCardInformation().getCvv());
         if (!matcher.find()){
+            logger.warn("Validation failed: Invalid CVV for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.CVV_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
@@ -72,6 +78,7 @@ public class OrderValidator implements OrderValidation {
         pattern = Pattern.compile("^(0[1-9]|1[0-2])/\\d{2}$");
         matcher = pattern.matcher(orderToValidate.getCreditCardInformation().getCreditCardExpiry());
         if (!matcher.find()){
+            logger.warn("Validation failed: Invalid expiry date for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
@@ -84,6 +91,7 @@ public class OrderValidator implements OrderValidation {
         // the day is set to the order day so that it does not the comparison (if expDate and orderDate
         // are in the same month and year, order date will not be after expDate).
         LocalDate expDate = LocalDate.of(year, month, YearMonth.of(year, month).lengthOfMonth());
+        logger.warn("Validation failed: Expired card used for order {}", orderToValidate.getOrderNo());
         if (orderToValidate.getOrderDate().isAfter(expDate)){
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
@@ -92,6 +100,7 @@ public class OrderValidator implements OrderValidation {
 
         // Checks that the number of pizzas in the order are less than the max allowed
         if (orderToValidate.getPizzasInOrder().length > SystemConstants.MAX_PIZZAS_PER_ORDER){
+            logger.warn("Validation failed: Maximum pizza count exceeded for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.MAX_PIZZA_COUNT_EXCEEDED);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
@@ -102,12 +111,14 @@ public class OrderValidator implements OrderValidation {
         // If that restaurant is null, then the first pizza is not in a restaurant's menu. This check is done outside
         // the for loop below because there is no need to check for multiple restaurant when there is only 1 pizza
         if (initialRestaurant == null){
+            logger.warn("Validation failed: Pizza not defined in any restaurant for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
         // used the stream method noneMatch to check if the order date is not on any of the restaurants opening days
         if (Arrays.stream(initialRestaurant.openingDays()).noneMatch(day -> orderToValidate.getOrderDate().getDayOfWeek() == day)){
+            logger.warn("Validation failed: Restaurant closed on order date for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.RESTAURANT_CLOSED);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
@@ -116,11 +127,13 @@ public class OrderValidator implements OrderValidation {
         for (int i = 1; i < orderToValidate.getPizzasInOrder().length; i++){
             Restaurant currentRestaurant = restaurantWithPizza(orderToValidate.getPizzasInOrder()[i], definedRestaurants);
             if (currentRestaurant == null){
+                logger.warn("Validation failed: Pizza not defined in any restaurant for order {}", orderToValidate.getOrderNo());
                 orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
                 orderToValidate.setOrderStatus(OrderStatus.INVALID);
                 return orderToValidate;
             }
             if (currentRestaurant != initialRestaurant){
+                logger.warn("Validation failed: Multiple restaurants in order {}", orderToValidate.getOrderNo());
                 orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
                 orderToValidate.setOrderStatus(OrderStatus.INVALID);
                 return orderToValidate;
@@ -133,11 +146,13 @@ public class OrderValidator implements OrderValidation {
         }
 
         if (totalOrderPrice != orderToValidate.getPriceTotalInPence()){
+            logger.warn("Validation failed: Incorrect total price for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.TOTAL_INCORRECT);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;
         }
 
+        logger.info("Validation succeeded for order {}", orderToValidate.getOrderNo());
         orderToValidate.setOrderValidationCode(OrderValidationCode.NO_ERROR);
         orderToValidate.setOrderStatus(OrderStatus.DELIVERED);
         return orderToValidate;

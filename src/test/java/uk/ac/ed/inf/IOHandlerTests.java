@@ -25,7 +25,7 @@ public class IOHandlerTests {
         // Configure WireMock
         WireMock.configureFor("localhost", 8083);
 
-        configureMockServer.configure(wireMockServer);
+        ConfigureMockServer.configure(wireMockServer);
     }
 
     @AfterAll

@@ -24,7 +24,7 @@ public class RestIntegrationTests {
         // Configure WireMock
         WireMock.configureFor("localhost", 8080);
 
-        configureMockServer.configure(wireMockServer);
+        ConfigureMockServer.configure(wireMockServer);
 
     }
 

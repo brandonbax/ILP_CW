@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 
-public class configureMockServer {
+public class ConfigureMockServer {
     public static void configure(WireMockServer wireMockServer) {
         // Stub for 2025-01-13
         wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-13"))

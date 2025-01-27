@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class MainTest {
+public class SystemTests {
     String baseUrl = "http://localhost:8082/";
     String date = "2025-01-13";
     String[] args = {date, baseUrl};

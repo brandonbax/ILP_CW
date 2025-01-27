@@ -1,5 +1,7 @@
 package uk.ac.ed.inf;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import uk.ac.ed.inf.ilp.constant.SystemConstants;
 import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
@@ -10,6 +12,7 @@ public class PathFinder {
 
     public static final int NUM_OF_DIRECTIONS = 16;
     private final LngLatHandler lngLatHandler = new LngLatHandler();
+    private static final Logger logger = LogManager.getLogger();
 
     /**
      * @param start is the start of the path
@@ -19,6 +22,7 @@ public class PathFinder {
      * @return the shortest path from {@code start} to {@code goal} or null if there is no path
      */
     public ArrayList<Node> findShortestPath(LngLat start, LngLat goal, NamedRegion[] noFlyZones, NamedRegion centralArea){
+        logger.info("Finding shortest path from {} to {}", start, goal);
         PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(c -> c.f));     // frontier
         HashSet<Node> closedSet = new HashSet<>();         // visited
         Node startNode = new Node(start);
@@ -35,6 +39,7 @@ public class PathFinder {
             // then the method should return null. The number could probably be lower, however, I don't want
             // the method to fail when there is a hard to calculate path.
             if (closedSet.size() > 200000){
+                logger.error("Path could not be found due to timeout");
                 return null;
             }
             Node current = openSet.poll();
@@ -50,6 +55,7 @@ public class PathFinder {
             }
 
             if (lngLatHandler.isCloseTo(current.pos, goal)){
+                logger.info("Found shortest path from {} to {}", start, goal);
                 // Stores the reverse of the path found by A*
                 ArrayList<Node> reversePath = new ArrayList<>();
 

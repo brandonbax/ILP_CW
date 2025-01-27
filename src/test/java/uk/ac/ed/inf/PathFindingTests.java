@@ -16,8 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-@Timeout(value=60, unit=TimeUnit.SECONDS)
-public class PathFindingSystemTests {
+public class PathFindingTests {
     ObjectMapper mapper = new ObjectMapper();
     static IOHandler ioHandler = new IOHandler();
     static LocalDate date = LocalDate.parse("2025-01-13");
@@ -34,7 +33,7 @@ public class PathFindingSystemTests {
         // Configure WireMock
         WireMock.configureFor("localhost", 8081);
 
-        configureMockServer.configure(wireMockServer);
+        ConfigureMockServer.configure(wireMockServer);
     }
 
     @AfterAll
@@ -123,6 +122,7 @@ public class PathFindingSystemTests {
     }
 
     @Test
+    @Timeout(value=60, unit=TimeUnit.SECONDS)
     void multiOrderHard(){
         Move[] flightpath = null;
         // Adds additional no-fly zones to make the path finding harder

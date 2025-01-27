@@ -6,6 +6,8 @@ import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import uk.ac.ed.inf.ilp.constant.OrderStatus;
 import uk.ac.ed.inf.ilp.data.LngLat;
 import uk.ac.ed.inf.ilp.data.NamedRegion;
@@ -57,6 +59,8 @@ public class IOHandler {
         this.orders = orders;
     }
 
+    private static final Logger logger = LogManager.getLogger();
+
     public IOHandler(){
         this.restaurants = null;
         this.orders = null;
@@ -91,6 +95,7 @@ public class IOHandler {
      * @param date is the date used to retrieve orders
      */
     public void readRestData(String baseUrl, LocalDate date){
+        logger.info("Reading from {} on date {}", baseUrl, date);
         mapper.registerModule(new JavaTimeModule());
         this.date = date;
 
@@ -130,7 +135,7 @@ public class IOHandler {
         try {
             Files.createDirectories(Paths.get("./" + OUTPUT_FOLDER_NAME));
         } catch (Exception e){
-            throw new RuntimeException("Failed to create output folder");
+            logger.error("Error creating output folder");
         }
 
         // Since there may be multiple orders to the same restaurant within a day, it would be more efficient to reuse
@@ -189,7 +194,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "deliveries-" + date + ".json"), deliveries);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate deliveries file");
+            logger.error("Error writing deliveries");
         }
 
         // Removes the hover node at the start of the path
@@ -222,7 +227,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "flightpath-" + date + ".json"), droneMoves);
         } catch (Exception e){
-            throw new RuntimeException("Failed to generate flightpath file");
+            logger.error("Error writing flightpath");
         }
 
         FeatureCollection featureCollection = new FeatureCollection();
@@ -233,7 +238,7 @@ public class IOHandler {
         try{
             mapper.writeValue(new File("./" + OUTPUT_FOLDER_NAME + "drone-" + date + ".geojson"), featureCollection);
         } catch (Exception e){
-            throw new RuntimeException("Failed to generate geojson file");
+            logger.error("Error writing geojson file");
         }
     }
 }
