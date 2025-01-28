@@ -6,7 +6,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 
 public class ConfigureMockServer {
-    public static void configure(WireMockServer wireMockServer) {
+    String noFlyZoneFileName;
+    public ConfigureMockServer(String noFlyZoneFileName) {
+        this.noFlyZoneFileName = noFlyZoneFileName;
+    }
+
+    public void configure(WireMockServer wireMockServer) {
         // Stub for 2025-01-13
         wireMockServer.stubFor(get(urlPathEqualTo("/orders/2025-01-13"))
                 .willReturn(aResponse()
@@ -26,7 +31,7 @@ public class ConfigureMockServer {
         wireMockServer.stubFor(get(urlPathEqualTo("/noFlyZones"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("noFlyZones.json")));
+                        .withBodyFile(noFlyZoneFileName)));
 
         wireMockServer.stubFor(get(urlPathEqualTo("/centralArea"))
                 .willReturn(aResponse()

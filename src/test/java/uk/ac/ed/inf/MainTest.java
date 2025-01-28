@@ -20,8 +20,8 @@ public class MainTest {
 
         // Configure WireMock
         WireMock.configureFor("localhost", 8082);
-
-        ConfigureMockServer.configure(wireMockServer);
+        ConfigureMockServer configureMockServer = new ConfigureMockServer("noFlyMedium.json");
+        configureMockServer.configure(wireMockServer);
     }
 
     @AfterAll

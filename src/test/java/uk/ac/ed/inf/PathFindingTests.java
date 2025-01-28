@@ -32,8 +32,8 @@ public class PathFindingTests {
 
         // Configure WireMock
         WireMock.configureFor("localhost", 8081);
-
-        ConfigureMockServer.configure(wireMockServer);
+        ConfigureMockServer configureMockServer = new ConfigureMockServer("noFlyMedium.json");
+        configureMockServer.configure(wireMockServer);
     }
 
     @AfterAll

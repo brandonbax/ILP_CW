@@ -24,8 +24,8 @@ public class IOHandlerTests {
 
         // Configure WireMock
         WireMock.configureFor("localhost", 8083);
-
-        ConfigureMockServer.configure(wireMockServer);
+        ConfigureMockServer configureMockServer = new ConfigureMockServer("noFlyMedium.json");
+        configureMockServer.configure(wireMockServer);
     }
 
     @AfterAll

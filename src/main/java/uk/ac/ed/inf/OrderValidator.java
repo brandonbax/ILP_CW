@@ -91,8 +91,8 @@ public class OrderValidator implements OrderValidation {
         // the day is set to the order day so that it does not the comparison (if expDate and orderDate
         // are in the same month and year, order date will not be after expDate).
         LocalDate expDate = LocalDate.of(year, month, YearMonth.of(year, month).lengthOfMonth());
-        logger.warn("Validation failed: Expired card used for order {}", orderToValidate.getOrderNo());
         if (orderToValidate.getOrderDate().isAfter(expDate)){
+            logger.warn("Validation failed: Expired card used for order {}", orderToValidate.getOrderNo());
             orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
             orderToValidate.setOrderStatus(OrderStatus.INVALID);
             return orderToValidate;

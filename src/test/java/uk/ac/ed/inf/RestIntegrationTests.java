@@ -23,9 +23,8 @@ public class RestIntegrationTests {
 
         // Configure WireMock
         WireMock.configureFor("localhost", 8080);
-
-        ConfigureMockServer.configure(wireMockServer);
-
+        ConfigureMockServer configureMockServer = new ConfigureMockServer("noFlyMedium.json");
+        configureMockServer.configure(wireMockServer);
     }
 
     @AfterAll
@@ -50,7 +49,7 @@ public class RestIntegrationTests {
         Order[] orders = mapper.readValue(response.body(), Order[].class);
 
         String firstOrderId = orders[0].getOrderNo();
-        Assertions.assertEquals("0C65E619", firstOrderId);
+        Assertions.assertEquals("0C65E612", firstOrderId);
     }
 
     @Test

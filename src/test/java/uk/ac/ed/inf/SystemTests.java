@@ -8,29 +8,71 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class SystemTests {
-    String baseUrl = "http://localhost:8082/";
-//    String date = "2025-01-13";
-//    String[] args = {date, baseUrl};
-    static WireMockServer wireMockServer;
+    static WireMockServer wireMockServer1;
+    static WireMockServer wireMockServer2;
+    static WireMockServer wireMockServer3;
 
     @BeforeAll
     public static void setUp() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8082));
-        wireMockServer.start();
+        wireMockServer1 = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8088));
+        wireMockServer1.start();
 
         // Configure WireMock
-        WireMock.configureFor("localhost", 8082);
+        WireMock.configureFor("localhost", 8088);
 
-        ConfigureMockServer.configure(wireMockServer);
+        ConfigureMockServer configureMockServer1 = new ConfigureMockServer("noFlyEasy.json");
+        configureMockServer1.configure(wireMockServer1);
+
+        wireMockServer2 = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8089));
+        wireMockServer2.start();
+
+        WireMock.configureFor("localhost", 8089);
+        ConfigureMockServer configureMockServer2 = new ConfigureMockServer("noFlyMedium.json");
+        configureMockServer2.configure(wireMockServer2);
+
+        wireMockServer3 = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8090));
+        wireMockServer3.start();
+
+        WireMock.configureFor("localhost", 8090);
+        ConfigureMockServer configureMockServer3 = new ConfigureMockServer("noFlyHard.json");
+        configureMockServer3.configure(wireMockServer3);
+
     }
 
     @AfterAll
     public static void tearDown() {
-        wireMockServer.stop();
+        wireMockServer1.stop();
+        wireMockServer2.stop();
+        wireMockServer3.stop();
     }
 
     @Test
-    void testEasy(){
-        Main.main(new String[]{"2025-01-13", baseUrl});
+    void testEasyLowOrders(){
+        Main.main(new String[]{"2025-01-13", "http://localhost:8088/"});
+    }
+
+    @Test
+    void testEasyManyOrders(){
+        Main.main(new String[]{"2025-01-20", "http://localhost:8088/"});
+    }
+
+    @Test
+    void testMediumLowOrders(){
+        Main.main(new String[]{"2025-01-13", "http://localhost:8089/"});
+    }
+
+    @Test
+    void testMediumManyOrders(){
+        Main.main(new String[]{"2025-01-20", "http://localhost:8089/"});
+    }
+
+    @Test
+    void testHardLowOrders(){
+        Main.main(new String[]{"2025-01-13", "http://localhost:8090/"});
+    }
+
+    @Test
+    void testHardManyOrders(){
+        Main.main(new String[]{"2025-01-20", "http://localhost:8090/"});
     }
 }

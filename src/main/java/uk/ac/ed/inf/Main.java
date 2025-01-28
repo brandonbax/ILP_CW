@@ -14,6 +14,7 @@ public class Main {
     private static final Logger logger = LogManager.getLogger();
 
     public static void main( String[] args ) {
+        long startTime = System.currentTimeMillis();
         if (args.length != 2){
             logger.fatal("There must be 2 arguments");
             System.exit(1);
@@ -68,5 +69,7 @@ public class Main {
             logger.fatal("Failed to write files: {}", String.valueOf(e));
             System.exit(6);
         }
+
+        logger.info("Time taken: {}ms", System.currentTimeMillis() - startTime);
     }
 }
